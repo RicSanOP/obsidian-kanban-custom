@@ -71,6 +71,7 @@ export function DragDropApp({
           );
         };
 
+        // @DONE add update to complete marker
         parseItems(data.content)
           .then((items) => {
             const processed = items.map((item) =>
@@ -78,6 +79,9 @@ export function DragDropApp({
                 data: {
                   isComplete: {
                     $set: !!destinationParent?.data?.shouldMarkItemsComplete,
+                  },
+                  completeMarker: {
+                    $set: destinationParent?.data?.itemsCompleteMarker,
                   },
                 },
               })

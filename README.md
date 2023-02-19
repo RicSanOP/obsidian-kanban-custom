@@ -2,8 +2,19 @@
 
 Create markdown-backed Kanban boards in [Obsidian](https://obsidian.md/)
 
-- [Bugs, Issues, & Feature Requests](https://github.com/mgmeyers/obsidian-kanban/issues)
-- [Development Roadmap](https://github.com/mgmeyers/obsidian-kanban/projects/1)
+## Custom Feature Additions
+
+This custom version of the plugin has 2 new features:
+
+#### Periods
+
+If the 'Allow Period in Dates' setting is on, Kanban boards can render larger time periods such as weeks, months, quarters and years. This works along with the [Periodic Notes](https://github.com/liamcain/obsidian-periodic-notes) plugin to allow for Kanban cards/items to be linked to daily, weekly, monthly, quarterly or yearly journals using the same date notation (@ by default). Note that this setting overrides the date and date display formats.
+
+#### Lane Complete Markers
+
+Comes prepackaged with this version of the plugin, Kanban lanes now have an extra setting that allows you to set a task complete marker per lane. The complete marker is the single character that goes in between the `[ ]` symbols whenever the respective card/item is placed in a given lane. This allows for different lanes to mark complete tasks differently (e.g. with the cancelled marker '-' or the reschedule marker '<'). This feature has not been tested with the show checkbox in card setting.
+
+## Sample Images
 
 ![Screen Shot 2021-09-16 at 12.58.22 PM.png](https://matthewmeye.rs/obsidian-kanban/Assets/Screen%20Shot%202021-09-16%20at%2012.58.22%20PM.png)
 

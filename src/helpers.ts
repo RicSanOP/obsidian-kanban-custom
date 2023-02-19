@@ -1,4 +1,5 @@
 import { App, TFile } from 'obsidian';
+import { moment } from 'obsidian';
 import {
   getDailyNoteSettings,
   getDateFromFile,
@@ -74,4 +75,30 @@ export function hasFrontmatterKey(file: TFile) {
 export function laneTitleWithMaxItems(title: string, maxItems?: number) {
   if (!maxItems) return title;
   return `${title} (${maxItems})`;
+}
+
+// @DONE incorporate period based parsing helper function
+export function parsePeriod(periodStr: string) {
+  // parse the time string by iso format
+  let period : Record<'unit' | 'isoFormat', string> = null
+  let periodMoment = null
+  const periods = [
+    { unit: 'day', isoFormat: 'YYYY-MM-DD'},
+    { unit: 'week', isoFormat: 'gggg-[W]ww'},
+    { unit: 'month', isoFormat: 'YYYY-MM'},
+    { unit: 'quarter', isoFormat: 'YYYY-[Q]Q'},
+    { unit: 'year', isoFormat: 'YYYY'}
+  ]
+  // iterate through period units and get due date from end of periods
+  for (let p of periods) {
+    periodMoment = moment(periodStr, p.isoFormat, true).endOf(p.unit)
+    if (periodMoment.isValid()) {
+        period = p
+        break
+    }
+  }
+  if (!period) {
+      console.error(`invalid period format: ${periodStr}`)
+  }
+  return { period: periodMoment, unit: period.unit, format: period.isoFormat }
 }

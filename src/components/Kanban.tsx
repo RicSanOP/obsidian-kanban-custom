@@ -5,6 +5,11 @@ import { TFile, moment } from 'obsidian';
 import {
   appHasDailyNotesPluginLoaded,
   createDailyNote,
+  createWeeklyNote,
+  createMonthlyNote,
+  createQuarterlyNote,
+  createYearlyNote,
+  createPeriodicNote,
 } from 'obsidian-daily-notes-interface';
 import Preact from 'preact/compat';
 
@@ -17,6 +22,8 @@ import { getNormalizedPath } from 'src/helpers/renderMarkdown';
 import { KanbanView } from 'src/KanbanView';
 import { t } from 'src/lang/helpers';
 import { StateManager } from 'src/StateManager';
+// @DONE import period parsing function and generic periodic note function
+import { parsePeriod } from 'src/helpers';
 
 import { DndScope } from '../dnd/components/Scope';
 import { getBoardModifiers } from '../helpers/boardModifiers';
@@ -211,18 +218,45 @@ export const Kanban = ({ view, stateManager }: KanbanProps) => {
         const inNewLeaf = e.button === 1 || e.ctrlKey || e.metaKey;
         const isUnresolved = closestAnchor.hasClass('is-unresolved');
 
+        // @DONE modify to create any type of periodic note and not just daily notes
         if (isUnresolved && appHasDailyNotesPluginLoaded()) {
-          const dateFormat = stateManager.getSetting('date-format');
-          const parsed = moment(destination, dateFormat, true);
+          const periodInDates = stateManager.getSetting('periods-in-dates')
+          if (periodInDates) {
+            var { period: parsed, unit, format } = parsePeriod(destination);
+          } else {
+            const dateFormat = stateManager.getSetting('date-format');
+            var parsed = moment(destination, dateFormat, true);
+            var unit = 'day';
+          }
 
           if (parsed.isValid()) {
             try {
-              const dailyNote = await createDailyNote(parsed);
+              let createPeriodicFn : ((date: moment.Moment) => Promise<TFile>);
+              switch (unit) {
+                case 'day':
+                  createPeriodicFn = createDailyNote;
+                  break;
+                case 'week':
+                  createPeriodicFn = createWeeklyNote;
+                  break;
+                case 'month':
+                  createPeriodicFn = createMonthlyNote;
+                  break;
+                case 'quarter':
+                  createPeriodicFn = createQuarterlyNote;
+                  break;
+                case 'year':
+                  createPeriodicFn = createYearlyNote;
+                  break;
+                default:
+                  break;
+              }
+              const periodicNote = await createPeriodicFn(parsed);
               const leaf = inNewLeaf
                 ? app.workspace.getLeaf(true)
                 : app.workspace.getLeaf(false);
 
-              await leaf.openFile(dailyNote as TFile, { active: true });
+              await leaf.openFile(periodicNote as TFile, { active: true });
             } catch (e) {
               console.error(e);
               stateManager.setError(e);

@@ -72,6 +72,7 @@ export interface KanbanSettings {
   'new-line-trigger'?: 'enter' | 'shift-enter';
   'new-note-folder'?: string;
   'new-note-template'?: string;
+  'periods-in-dates'?: boolean;
   'prepend-archive-date'?: boolean;
   'prepend-archive-format'?: string;
   'prepend-archive-separator'?: string;
@@ -110,6 +111,7 @@ export const settingKeyLookup: Record<keyof KanbanSettings, true> = {
   'new-line-trigger': true,
   'new-note-folder': true,
   'new-note-template': true,
+  'periods-in-dates': true,
   'prepend-archive-date': true,
   'prepend-archive-format': true,
   'prepend-archive-separator': true,
@@ -861,6 +863,55 @@ export class SettingsManager {
             });
           }
         });
+      });
+
+    // @DONE created new flag for period based formatting
+    new Setting(contentEl)
+      .setName('Allow Period Formats')
+      .setDesc(
+        'When toggled, dates are extended to include period formats such as weeks, months, quarters or years. When converted to dates, they resolve to the end of the period indicated (e.g. *2023* will resolve to *2023-12-31*). This overrides the date format settings below.'
+      )
+      .then((setting) => {
+        let toggleComponent: ToggleComponent;
+
+        setting
+          .addToggle((toggle) => {
+            toggleComponent = toggle;
+
+            const [value, globalValue] = this.getSetting(
+              'periods-in-dates',
+              local
+            );
+
+            if (value !== undefined) {
+              toggle.setValue(value as boolean);
+            } else if (globalValue !== undefined) {
+              toggle.setValue(globalValue as boolean);
+            }
+
+            toggle.onChange((newValue) => {
+              this.applySettingsUpdate({
+                'periods-in-dates': {
+                  $set: newValue,
+                },
+              });
+            });
+          })
+          .addExtraButton((b) => {
+            b.setIcon('lucide-rotate-ccw')
+              .setTooltip(t('Reset to default'))
+              .onClick(() => {
+                const [, globalValue] = this.getSetting(
+                  'periods-in-dates',
+                  local
+                );
+                toggleComponent.setValue(!!globalValue);
+
+                this.applySettingsUpdate({
+                  $unset: ['periods-in-dates'],
+                });
+              });
+          });
       });
 
     new Setting(contentEl).setName(t('Date format')).then((setting) => {

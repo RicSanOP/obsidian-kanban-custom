@@ -35,20 +35,27 @@ export function maybeCompleteForMove(
     destinationPath.slice(0, -1)
   );
 
+  // @DONE add maybe check for complete marker and update item
   const oldShouldComplete = sourceParent?.data?.shouldMarkItemsComplete;
   const newShouldComplete = destinationParent?.data?.shouldMarkItemsComplete;
+
+  const oldItemMarker = sourceParent?.data?.itemsCompleteMarker;
+  const newItemMarker = destinationParent?.data?.itemsCompleteMarker;
 
   // If neither the old or new lane set it complete, leave it alone
   if (!oldShouldComplete && !newShouldComplete) return item;
 
   // If it already matches the new lane, leave it alone
-  if (newShouldComplete === !!item.data.isComplete) return item;
+  if ((newShouldComplete === !!item.data.isComplete) && (oldItemMarker == newItemMarker)) return item;
 
   // It's different, update it
   return update(item, {
     data: {
       isComplete: {
         $set: newShouldComplete,
+      },
+      completeMarker: {
+        $set: newItemMarker,
       },
     },
   });

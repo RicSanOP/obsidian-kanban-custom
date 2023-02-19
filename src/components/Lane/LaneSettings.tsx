@@ -13,6 +13,7 @@ export interface LaneSettingsProps {
   lanePath: Path;
 }
 
+// @DONE added the ability for lanes to check off items when complete setting is toggled
 export function LaneSettings({ lane, lanePath }: LaneSettingsProps) {
   const { boardModifiers } = Preact.useContext(KanbanContext);
 
@@ -23,14 +24,32 @@ export function LaneSettings({ lane, lanePath }: LaneSettingsProps) {
           {t('Mark cards in this list as complete')}
         </div>
         <div
-          onClick={() =>
+          onClick={() => {
+            const newLane = update(lane, {
+              children: {
+                $set: lane.children.map((item, i) => {
+                  const itemPath = lanePath.concat([i])
+                  const newItem = update(item, {
+                    data: { 
+                      completeMarker: { $set: lane.data.itemsCompleteMarker },
+                      isComplete: { $set: !lane.data.shouldMarkItemsComplete },
+                    },
+                  })
+                  boardModifiers.updateItem(
+                    itemPath,
+                    newItem
+                  )
+                  return newItem
+                })
+              }
+            })
             boardModifiers.updateLane(
               lanePath,
-              update(lane, {
+              update(newLane, {
                 data: { $toggle: ['shouldMarkItemsComplete'] },
               })
             )
-          }
+          }}
           className={`checkbox-container ${
             lane.data.shouldMarkItemsComplete ? 'is-enabled' : ''
           }`}

@@ -37,6 +37,8 @@ export const DraggableLane = Preact.memo(function DraggableLane({
   const laneWidth = stateManager.useSetting('lane-width');
   const insertionMethod = stateManager.useSetting('new-card-insertion-method');
   const shouldMarkItemsComplete = !!lane.data.shouldMarkItemsComplete;
+  // @DONE get lane complete marker as well
+  const itemsCompleteMarker = lane.data.itemsCompleteMarker;
 
   const laneStyles = laneWidth ? { width: `${laneWidth}px` } : undefined;
 
@@ -50,6 +52,7 @@ export const DraggableLane = Preact.memo(function DraggableLane({
 
   useDragHandle(measureRef, dragHandleRef);
 
+  // @DONE update items complete marker as well
   const addItems = (items: Item[]) => {
     boardModifiers[shouldPrepend ? 'prependItems' : 'appendItems'](
       [...path, lane.children.length - 1],
@@ -59,6 +62,9 @@ export const DraggableLane = Preact.memo(function DraggableLane({
             isComplete: {
               // Mark the item complete if we're moving into a completed lane
               $set: shouldMarkItemsComplete,
+            },
+            completeMarker: {
+              $set: itemsCompleteMarker,
             },
           },
         })

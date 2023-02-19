@@ -20,6 +20,8 @@ export function LaneForm({
   const [shouldMarkAsComplete, setShouldMarkAsComplete] =
     Preact.useState(false);
   const [laneTitle, setLaneTitle] = Preact.useState('');
+  // @DONE add input choice for complete marker
+  const [laneCompleteMarker, setLaneCompleteMarker] = Preact.useState('x');
 
   const inputRef = Preact.useRef<HTMLTextAreaElement>();
   const clickOutsideRef = useOnclickOutside(
@@ -43,14 +45,17 @@ export function LaneForm({
       data: {
         ...parseLaneTitle(laneTitle),
         shouldMarkItemsComplete: shouldMarkAsComplete,
+        itemsCompleteMarker: laneCompleteMarker,
       },
     });
 
     setLaneTitle('');
     setShouldMarkAsComplete(false);
+    setLaneCompleteMarker('x')
     onNewLane();
   };
 
+  // @DONE add input field for complete marker (note the incorrect style class name using checkbox styling and lack of locale t)
   return (
     <div ref={clickOutsideRef} className={c('lane-form-wrapper')}>
       <div className={c('lane-input-wrapper')}>
@@ -82,6 +87,29 @@ export function LaneForm({
           className={`checkbox-container ${
             shouldMarkAsComplete ? 'is-enabled' : ''
           }`}
+        />
+      </div>
+      <div className={c('lane-input-wrapper')}>
+        <div className={c('checkbox-label')}>
+          {'Mark complete cards in this list with this character'}
+        </div>
+        <MarkdownEditor
+          ref={inputRef}
+          className={c('lane-input')}
+          onChange={(e) =>
+            setLaneCompleteMarker((e.target as HTMLTextAreaElement).value)
+          }
+          onEnter={(e) => {
+            if (!allowNewLine(e, stateManager)) {
+              e.preventDefault();
+              createLane();
+            }
+          }}
+          onSubmit={() => {
+            createLane();
+          }}
+          onEscape={closeLaneForm}
+          value={laneCompleteMarker}
         />
       </div>
       <div className={c('lane-input-actions')}>

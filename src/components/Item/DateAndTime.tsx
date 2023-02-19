@@ -4,6 +4,7 @@ import Preact from 'preact/compat';
 
 import { t } from 'src/lang/helpers';
 import { StateManager } from 'src/StateManager';
+import { parsePeriod } from 'src/helpers';
 
 import { c } from '../helpers';
 import { DateColorKey, Item } from '../types';
@@ -74,20 +75,34 @@ export function DateAndTime({
   const timeFormat = stateManager.useSetting('time-format');
   const dateDisplayFormat = stateManager.useSetting('date-display-format');
   const shouldLinkDate = stateManager.useSetting('link-date-to-daily-note');
-
+  // @DONE incorporate period in dates flag
+  const periodInDates = stateManager.useSetting('periods-in-dates');
+  
   const dateColor = Preact.useMemo(() => {
     if (!item.data.metadata.date) return null;
     return getDateColor(item.data.metadata.date);
   }, [item.data.metadata.date, getDateColor]);
-
+  
   if (hideDateDisplay || !item.data.metadata.date) return null;
 
-  const dateStr = item.data.metadata.date.format(dateFormat);
-
-  if (!dateStr) return null;
-
+  // @DONE alter date string representations if period setting is on
+  /* there is a general inconsistency with the period in dates feature implementation
+  which is that the metadata information on periodUnit and periodFormat is somehow lost
+  along the way whenever there is an unresolved link that is changed */
+  if (periodInDates) {
+    ({
+      period: item.data.metadata.date,
+      unit: item.data.metadata.periodUnit,
+      format: item.data.metadata.periodFormat,
+    } = parsePeriod(item.data.metadata.dateStr))
+    var dateStr = item.data.metadata.date.format(item.data.metadata.periodFormat)
+    var dateDisplayStr = item.data.metadata.date.format(item.data.metadata.periodFormat)
+  } else {
+    var dateStr = item.data.metadata.date.format(dateFormat);
+    if (!dateStr) return null;
+    var dateDisplayStr = item.data.metadata.date.format(dateDisplayFormat);
+  }
   const hasTime = !!item.data.metadata.time;
-  const dateDisplayStr = item.data.metadata.date.format(dateDisplayFormat);
   const timeDisplayStr = !hasTime
     ? null
     : item.data.metadata.time.format(timeFormat);

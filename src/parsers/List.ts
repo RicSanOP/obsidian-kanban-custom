@@ -22,8 +22,9 @@ export class ListFormat implements BaseFormat {
     this.stateManager = stateManager;
   }
 
-  newItem(content: string, isComplete?: boolean, forceEdit?: boolean) {
-    return newItem(this.stateManager, content, isComplete, forceEdit);
+  // @DONE adapt to incorporate item complete marker
+  newItem(content: string, isComplete?: boolean, forceEdit?: boolean, completeMarker?: string) {
+    return newItem(this.stateManager, content, isComplete, forceEdit, completeMarker);
   }
 
   updateItemContent(item: Item, content: string) {
@@ -34,6 +35,7 @@ export class ListFormat implements BaseFormat {
     return boardToMd(board);
   }
 
+  // @DONE alter deserialization to look for complete marker text and assign to lane data
   mdToBoard(md: string) {
     const { ast, settings, frontmatter } = parseMarkdown(this.stateManager, md);
     const newBoard = astToUnhydratedBoard(

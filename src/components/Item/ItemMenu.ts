@@ -181,6 +181,7 @@ export function useItemMenu({
               .setTitle(t('Insert card before'))
               .onClick(async () =>
                 boardModifiers.insertItems(path, [
+                  // @DONE adapt to incorporate item complete marker (was not modified)
                   await stateManager.getNewItem('', false, true),
                 ])
               );
@@ -194,6 +195,7 @@ export function useItemMenu({
                 newPath[newPath.length - 1] = newPath[newPath.length - 1] + 1;
 
                 boardModifiers.insertItems(newPath, [
+                  // @DONE adapt to incorporate item complete marker (was not modified)
                   await stateManager.getNewItem('', false, true),
                 ]);
               });

@@ -11,11 +11,13 @@ export enum ParserFormats {
   List,
 }
 
+// @DONE adapt to incorporate item complete marker
 export interface BaseFormat {
   newItem(
     content: string,
     isComplete?: boolean,
-    forceEdit?: boolean
+    forceEdit?: boolean,
+    completeMarker?: string
   ): Promise<Item>;
   updateItemContent(item: Item, content: string): Promise<Item>;
   boardToMd(board: Board): string;

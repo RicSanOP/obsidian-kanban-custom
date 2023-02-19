@@ -469,8 +469,9 @@ export class StateManager {
     }
   }
 
-  getNewItem(content: string, isComplete?: boolean, forceEdit?: boolean) {
-    return this.parser.newItem(content, isComplete, forceEdit);
+  // @DONE adapt to incorporate item complete marker
+  getNewItem(content: string, isComplete?: boolean, forceEdit?: boolean, completeMarker?: string) {
+    return this.parser.newItem(content, isComplete, forceEdit, completeMarker);
   }
 
   updateItemContent(item: Item, content: string) {

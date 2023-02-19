@@ -13,6 +13,8 @@ export enum LaneSort {
 
 export interface LaneData {
   shouldMarkItemsComplete?: boolean;
+  // @DONE add variable for complete marker
+  itemsCompleteMarker?: string;
   title: string;
   maxItems?: number;
   dom?: HTMLDivElement;
@@ -61,6 +63,9 @@ export interface FileMetadata {
 export interface ItemMetaData {
   dateStr?: string;
   date?: moment.Moment;
+  // @DONE add variable for period time unit and format. dateStr will hold the original text and date will hold the moment object
+  periodUnit?: string;
+  periodFormat?: string;
   timeStr?: string;
   time?: moment.Moment;
   tags?: string[];
@@ -73,6 +78,8 @@ export interface ItemMetaData {
 export interface ItemData {
   blockId?: string;
   isComplete?: boolean;
+  // @DONE add variable for complete marker
+  completeMarker?: string;
   title: string;
   titleRaw: string;
   titleSearch?: string;

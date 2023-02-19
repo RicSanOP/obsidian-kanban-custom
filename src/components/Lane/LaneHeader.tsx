@@ -14,6 +14,7 @@ import { Lane } from '../types';
 import { ConfirmAction, useSettingsMenu } from './LaneMenu';
 import { LaneSettings } from './LaneSettings';
 import { LaneTitle } from './LaneTitle';
+import { LaneCompleteMarker } from './LaneCompleteMarker'
 
 interface LaneHeaderProps {
   lane: Lane;
@@ -44,6 +45,7 @@ export const LaneHeader = Preact.memo(function LaneHeader({
     }
   }, [lane.data.forceEditMode]);
 
+  // @DONE add div for lane complete marker setting (the update should propogate to children)
   return (
     <>
       <div
@@ -121,6 +123,40 @@ export const LaneHeader = Preact.memo(function LaneHeader({
       </div>
 
       {isEditing && <LaneSettings lane={lane} lanePath={lanePath} />}
+
+      {isEditing && <LaneCompleteMarker
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          marker={lane.data.itemsCompleteMarker}
+          onChange={(e) => {
+            const marker = (e.target as HTMLTextAreaElement).value;
+            const newLane = update(lane, {
+              children: { 
+                $set: lane.children.map((item, i) => {
+                  const itemPath = lanePath.concat([i])
+                  const newItem = update(item, {
+                    data: {
+                      completeMarker: { $set: marker }
+                    }
+                  })
+                  boardModifiers.updateItem(
+                    itemPath,
+                    newItem
+                  )
+                  return newItem
+                })
+              }
+            });
+            boardModifiers.updateLane(
+              lanePath,
+              update(newLane, {
+                data: {
+                  itemsCompleteMarker: { $set: marker }
+                },
+              })
+            );
+          }}
+        />}
 
       {confirmAction && (
         <ConfirmAction

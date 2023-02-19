@@ -56,6 +56,7 @@ export function listItemToItemData(
 
   let title = itemContent;
 
+  // @DONE add assignment for complete marker if the mdast plugin ListItem does
   const itemData: ItemData = {
     titleRaw: replaceBrs(itemContent),
     blockId: undefined,
@@ -74,6 +75,7 @@ export function listItemToItemData(
     },
     dom: undefined,
     isComplete: !!item.checked,
+    completeMarker: item.checkChar,
   };
 
   visit(
@@ -181,6 +183,7 @@ function isArchiveLane(
   return prev && prev.type === 'thematicBreak';
 }
 
+// @DONE read complete marker setting from lane complete line (comes in between curly braces)
 export function astToUnhydratedBoard(
   stateManager: StateManager,
   settings: KanbanSettings,
@@ -198,6 +201,7 @@ export function astToUnhydratedBoard(
       const title = getStringFromBoundary(md, headingBoundary);
 
       let shouldMarkItemsComplete = false;
+      let itemsCompleteMarker = 'x';
 
       const list = getNextOfType(root.children, index, 'list', (child) => {
         if (child.type === 'heading') return false;
@@ -209,8 +213,10 @@ export function astToUnhydratedBoard(
             return false;
           }
 
-          if (childStr === t('Complete')) {
+          let childRegex = childStr.match(`${t('Complete')} \{(.)\}`)
+          if (childRegex[1]) {
             shouldMarkItemsComplete = true;
+            itemsCompleteMarker = childRegex[1]
             return true;
           }
         }
@@ -240,6 +246,7 @@ export function astToUnhydratedBoard(
           data: {
             ...parseLaneTitle(title),
             shouldMarkItemsComplete,
+            itemsCompleteMarker,
           },
         });
       } else {
@@ -256,6 +263,7 @@ export function astToUnhydratedBoard(
           data: {
             ...parseLaneTitle(title),
             shouldMarkItemsComplete,
+            itemsCompleteMarker,
           },
         });
       }
@@ -276,12 +284,13 @@ export function astToUnhydratedBoard(
   };
 }
 
+// @DONE use complete marker text here
 export async function updateItemContent(
   stateManager: StateManager,
   oldItem: Item,
   newContent: string
 ) {
-  const md = `- [${oldItem.data.isComplete ? 'x' : ' '}] ${replaceNewLines(
+  const md = `- [${oldItem.data.isComplete ? oldItem.data.completeMarker : ' '}] ${replaceNewLines(
     newContent
   )}${oldItem.data.blockId ? ` ^${oldItem.data.blockId}` : ''}`;
 
@@ -308,13 +317,15 @@ export async function updateItemContent(
   return newItem;
 }
 
+// @DONE use complete marker text here
 export async function newItem(
   stateManager: StateManager,
   newContent: string,
   isComplete?: boolean,
-  forceEdit?: boolean
+  forceEdit?: boolean,
+  completeMarker?: string
 ) {
-  const md = `- [${isComplete ? 'x' : ' '}] ${replaceNewLines(newContent)}`;
+  const md = `- [${isComplete ? completeMarker : ' '}] ${replaceNewLines(newContent)}`;
 
   const ast = parseFragment(stateManager, md);
 
@@ -375,8 +386,9 @@ export async function reparseBoard(stateManager: StateManager, board: Board) {
   }
 }
 
+// @DONE use complete marker text here
 function itemToMd(item: Item) {
-  return `- [${item.data.isComplete ? 'x' : ' '}] ${replaceNewLines(
+  return `- [${item.data.isComplete ? `${item.data.completeMarker}` : ' '}] ${replaceNewLines(
     item.data.titleRaw
   )}${item.data.blockId ? ` ^${item.data.blockId}` : ''}`;
 }
@@ -392,8 +404,9 @@ function laneToMd(lane: Lane) {
 
   lines.push('');
 
+  // @DONE add complete marker to complete string serialization
   if (lane.data.shouldMarkItemsComplete) {
-    lines.push(completeString);
+    lines.push(`${completeString} {${lane.data.itemsCompleteMarker}}`);
   }
 
   lane.children.forEach((item) => {

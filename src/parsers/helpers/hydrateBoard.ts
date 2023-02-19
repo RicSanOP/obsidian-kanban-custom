@@ -9,6 +9,9 @@ import { StateManager } from 'src/StateManager';
 
 import { getSearchValue } from '../common';
 
+// @DONE imported custom period helper function
+import { parsePeriod } from 'src/helpers';
+
 export async function hydrateLane(stateManager: StateManager, lane: Lane) {
   try {
     const laneTitleDom = await renderMarkdown(
@@ -46,11 +49,22 @@ export async function hydrateItem(stateManager: StateManager, item: Item) {
 
   const { dateStr, timeStr, fileAccessor } = item.data.metadata;
 
+  // @MARK parse the date to extract time unit and moment object then set the item metadata
   if (dateStr) {
-    item.data.metadata.date = moment(
-      dateStr,
-      stateManager.getSetting('date-format')
-    );
+    if (stateManager.getSetting('periods-in-dates')) {
+      ({
+        period: item.data.metadata.date,
+        unit: item.data.metadata.periodUnit,
+        format: item.data.metadata.periodFormat,
+      } = parsePeriod(dateStr))
+    } else {
+      item.data.metadata.periodFormat = stateManager.getSetting('date-format');
+      item.data.metadata.date = moment(
+        dateStr,
+        item.data.metadata.periodFormat
+      );
+      item.data.metadata.periodUnit = 'day';
+    }
   }
 
   if (timeStr) {
