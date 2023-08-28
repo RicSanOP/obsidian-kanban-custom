@@ -1,10 +1,9 @@
-## Linked Page Metadata
 
 This setting allows displaying [frontmatter](https://help.obsidian.md/Advanced+topics/YAML+front+matter) and [Dataview](https://blacksmithgu.github.io/obsidian-dataview/data-annotation/) metadata of the first page linked within a card. Note, there are [[Frontmatter limitations & gotchas]].
 
 For example, say you have this note in your vault:
 
-```
+```markdown
 ---
 demo-field: This is a demo frontmatter field
 ---
